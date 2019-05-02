@@ -41,12 +41,12 @@ startDay = 0			# Initial day
 #Select the geographic location. Refer to the Astral plugin to see available locations (or give a lon+lat)
 # Use e.g. https://www.latlong.net/
 from astral import Location
-
+#--edit--location in Asia
 location = Location()
 location.solar_depression = 'civil'
-location.latitude = 52.239095
-location.longitude = 6.857018
-location.timezone = 'Europe/Amsterdam'
+location.latitude = -6.21462
+location.longitude = 106.84513
+location.timezone = 'Asia/Bangkok'
 location.elevation = 0
 
 #Select the devices in the neighbourhood
@@ -61,20 +61,22 @@ consumptionFactor = 1.0 #consumption was a bit too high
 
 # Electric mobility, restriction that the sum <= 100
 # Note, households with larger driving distances will receive EVs first
-penetrationEV 				= 13
-penetrationPHEV 			= 32
+#--edit--no EV/PHEV
+penetrationEV 				= 0
+penetrationPHEV 			= 0
 
 # PV and storage, restriction that Battery <= PV
 # Note PV and battery size depend on the annual household consumption
 # This emulates the Dutch "nul-op-the-meter regime (net zero annual electricity usage)
-penetrationPV				= 50
-penetrationBattery 			= 10	#Note only houses with PV will receive a battery!
+#--edit--no EV/PHEV
+penetrationPV				= 0
+penetrationBattery 			= 0	#Note only houses with PV will receive a battery!
 
 # Heating systems, with restriction that the sum <= 100
 penetrationHeatPump 		= 25
 penetrationCHP				= 5		# Combined heat and power
-
-penetrationInductioncooking = 25
+#--edit--no induction cooking
+penetrationInductioncooking = 0
 
 
 #Device parameters:
@@ -131,37 +133,38 @@ ConsumptionHouseVentilation = 	50 		#W
 
 #Household randomization
 #all values must be between 0-1000
+#--edit-- increase the activity chance
 familyOutingChanceMin = 			10 	#percentage
 familyOutingChanceMax = 			20 	#percentage
-personWeekdayActivityChanceMin = 	20 	#percentage
-personWeekdayActivityChanceMax = 	30 	#percentage
-personWeekendActivityChanceMin = 	20 	#percentage
-personWeekendActivityChanceMax = 	30 	#percentage
+personWeekdayActivityChanceMin = 	80 	#percentage
+personWeekdayActivityChanceMax = 	90 	#percentage
+personWeekendActivityChanceMin = 	80 	#percentage
+personWeekendActivityChanceMax = 	100 	#percentage
 
-
+#--edit-- test 1 household dual worker
 
 householdList = []
 
 #Select the types of households
 import households
 
-for i in range(0,2):
-	householdList.append(households.HouseholdSingleWorker())
+# for i in range(0,2):
+# 	householdList.append(households.HouseholdSingleWorker())
 
-for i in range(0,20):
-	householdList.append(households.HouseholdSingleRetired())
+# for i in range(0,20):
+# 	householdList.append(households.HouseholdSingleRetired())
 
-for i in range(0,6):
+for i in range(0,1):
 	householdList.append(households.HouseholdDualWorker(True))
 
-for i in range(0,6):
-	householdList.append(households.HouseholdDualWorker(False))
+# for i in range(0,6):
+# 	householdList.append(households.HouseholdDualWorker(False))
 
-for i in range(0,16):
-	householdList.append(households.HouseholdDualRetired())
+# for i in range(0,16):
+# 	householdList.append(households.HouseholdDualRetired())
 
-for i in range(0,20):
-	householdList.append(households.HouseholdFamilyDualWorker(True))
+# for i in range(0,20):
+# 	householdList.append(households.HouseholdFamilyDualWorker(True))
 
-for i in range(0,10):
-	householdList.append(households.HouseholdFamilyDualWorker(False))
+# for i in range(0,10):
+# 	householdList.append(households.HouseholdFamilyDualWorker(False))

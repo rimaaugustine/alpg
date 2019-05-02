@@ -28,10 +28,10 @@ class Person:
 	def generate(self, age):	
 		#Variates could also use a gauss distribution, some persons are more predictable than others ;)
 		self.Age = age
-		
-		self.WorkdayWakeUp_Avg				= profilegentools.gaussMinMax(7*60, 1.5*60)
+	#--edit-- shift the activity schedule
+		self.WorkdayWakeUp_Avg				= profilegentools.gaussMinMax(5*60, 0.5*60)
 		self.WorkdayWakeUp_Variate 			= 10
-		self.WorkdayLeave_Avg				= self.WorkdayWakeUp_Avg + profilegentools.gaussMinMax(45, 15)
+		self.WorkdayLeave_Avg				= self.WorkdayWakeUp_Avg + profilegentools.gaussMinMax(2.5*60, 15)
 		self.WorkdayLeave_Variate 			= 10
 		self.WorkdayArrival_Avg				= self.WorkdayLeave_Avg + profilegentools.gaussMinMax(8.5*60, 30) 
 		self.WorkdayArrival_Variate			= 15
@@ -39,17 +39,17 @@ class Person:
 		self.WorkdaySport_Variate			= 15
 		self.WorkdaySportDuration_Avg		= profilegentools.gaussMinMax(1.5*60, 30)
 		self.WorkdaySportDuration_Variate 	= 10
-		self.WorkdayBedTime_Avg				= self.WorkdayWakeUp_Avg + profilegentools.gaussMinMax(15.5*60,30) 
+		self.WorkdayBedTime_Avg				= self.WorkdayWakeUp_Avg + profilegentools.gaussMinMax(16*60,30) 
 		self.WorkdayBedTime_Variate			= 15
 		self.WorkdayActivities 				= random.randint(config.personWeekdayActivityChanceMin, config.personWeekdayActivityChanceMax) / 100 #Chance to conduct random activities			
 		
-		self.WeekendWakeUp_Avg 				= profilegentools.gaussMinMax(9*60, 2*60)
+		self.WeekendWakeUp_Avg 				= profilegentools.gaussMinMax(8*60, 2*60)
 		self.WeekendWakeUp_Variate 			= 20
 		self.WeekendSport_Avg				= profilegentools.gaussMinMax(14*60, 5*60)
 		self.WeekendSport_Variate			= 60
 		self.WeekendSportDuration_Avg		= profilegentools.gaussMinMax(1.5*60, 30)
 		self.WeekendSportDuration_Variate 	= 30
-		self.WeekendBedTime_Avg				= profilegentools.gaussMinMax(23*60, 30) 
+		self.WeekendBedTime_Avg				= profilegentools.gaussMinMax(22*60, 30) 
 		self.WeekendBedTime_Variate			= 10
 		self.WeekendActivities				= random.randint(config.personWeekendActivityChanceMin, config.personWeekendActivityChanceMax) / 100
 
