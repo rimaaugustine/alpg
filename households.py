@@ -39,8 +39,8 @@ class Household:
 		
 	def generate(self):
 		#The Yearly consumption is the normal consumption of domestic appliances as found for years in households. This excludes: 
-		#																										   (PH)EV, Heat Pump, PV
-		self.ConsumptionYearly		= profilegentools.gaussMinMax(3500,500) #kWh
+		#---edit---																									   (PH)EV, Heat Pump, PV
+		self.ConsumptionYearly		= profilegentools.gaussMinMax(1400,200) #kWh
 		
 		#According to http://www.energie-nederland.nl/wp-content/uploads/2013/04/EnergieTrends2014.pdf, this is the distribution for devices we are interested in:					
 		self.ConsumptionShare = {	"Electronics"	: profilegentools.gaussMinMax(17,3), \
@@ -502,7 +502,8 @@ class HouseholdCouple(Household):
 	# Select whether the second adult is a fulltime worker (both false), parttime or jobless
 	def __init__(self, parttime=False, jobless=False):
 		self.generate()
-		self.ConsumptionYearly		= profilegentools.gaussMinMax(3360,700)*config.consumptionFactor #kWh http://www.nibud.nl/uitgaven/huishouden/gas-elektriciteit-en-water.html
+		#--edit---
+		self.ConsumptionYearly		= profilegentools.gaussMinMax(1400,200)*config.consumptionFactor #kWh http://www.nibud.nl/uitgaven/huishouden/gas-elektriciteit-en-water.html
 		
 		assert(parttime == False or jobless == False) # ONLY one van be active
 		

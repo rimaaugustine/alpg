@@ -126,7 +126,7 @@ class DeviceKettle(Device):
 				
 		return DeviceProfile
 	
-	
+#without solar radiant
 class DeviceLighting(Device):
 	def simulate(self, timeintervals, occupancy, timestamp):
 		sun = config.location.sun(date=datetime.date.fromtimestamp(timestamp), local=True)
