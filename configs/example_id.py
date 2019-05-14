@@ -33,7 +33,7 @@ weather_timebaseDataset = 3600 #in seconds per interval
 
 
 #Simulation:
-#number of days to simulate and skipping of initial days. Simulation starts at Sunday January 1. 2017
+#number of days to simulate and skipping of initial days. Simulation starts at Sunday January 1. 
 numDays = 365			# number of days
 startDay = 0			# Initial day
 
@@ -113,22 +113,22 @@ powerBatterySmall = 	3700 	#W
 #Consumption of devices
 ConsumptionOven = 				2000	#W
 ConsumptionMicroWave = 			800		#W
-ConsumptionStoveVentilation = 	120 	#W #But this is maximum, usually set lower!
-ConsumptionInductionStove = 	2200 	#W #http://homeguides.sfgate.com/many-watts-induction-stove-85380.html
+ConsumptionStoveVentilation = 	0 	#W #But this is maximum, usually set lower!
+ConsumptionInductionStove = 	0 	#W #http://homeguides.sfgate.com/many-watts-induction-stove-85380.html
 
 ConsumptionFridgeBigMin = 		80		#W
 ConsumptionFridgeBigMax = 		120		#W
 ConsumptionFridgeSmallMin = 	50		#W
 ConsumptionFridgeSmallMax = 	80		#W
 
-ConsumptionKettle = 			2000	#W
+ConsumptionKettle = 			312	#W
 
 #White goods
 ConsumptionIron = 				2000	#W
-ConsumptionVacuumcleaner = 		1500	#W
+ConsumptionVacuumcleaner = 		0	#W
 
 #House
-ConsumptionHouseVentilation = 	50 		#W
+ConsumptionHouseVentilation = 	0 		#W
 
 
 #Household randomization

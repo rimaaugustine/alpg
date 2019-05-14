@@ -103,11 +103,11 @@ class Household:
 		
 		
 		self.hasDishwasher = False
-		self.hasInductionCooking = random.randint(1,10)<4
+		self.hasInductionCooking = False
 		self.hasEV = False
 		self.hasHP = False
 		self.hasCHP = False
-		self.hasFloorHeating = True
+		self.hasFloorHeating = False
 		
 		self.numOfWashes = 0		#weekly
 		self.numOfDishwashes = 0 	#Weekly

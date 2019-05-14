@@ -59,7 +59,7 @@ class BufferTimeshiftableDevice(TimeShiftableDevice):
 		self.Consumption = consumption
 
 
-		
+
 class DeviceFridge(Device):
 	def generate(self, consumption):
 		self.Runtime = profilegentools.gaussMinMax(15, 5)
@@ -91,8 +91,6 @@ class DeviceFridge(Device):
 				self.State = 0
 			DeviceProfile[t] = self.State * self.Consumption
 		return DeviceProfile
-		
-		
 		
 class DeviceKettle(Device):
 	def simulate(self, timeintervals, occupancy):
@@ -143,7 +141,7 @@ class DeviceLighting(Device):
 				LightingProfile[m] = LightingOnProfile[m] + ((occupancy[m] - 1)*0.2)
 		return LightingProfile		
 	
-	
+	#tv and computer
 class DeviceElectronics(Device):
 	def simulate(self, timeintervals, occupancy, occupancyPerson):
 		ElectronicsProfile = [0] * 1440

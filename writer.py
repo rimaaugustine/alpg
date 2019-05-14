@@ -112,6 +112,7 @@ def writeNeighbourhood(num):
 	pass
 
 def writeHousehold(house, num):
+ 
 	#Save the profile:
 	writeCsvRow('Electricity_Profile.csv', num, house.Consumption['Total'])
 	writeCsvRow('Electricity_Profile_GroupOther.csv', num, house.Consumption['Other'])
