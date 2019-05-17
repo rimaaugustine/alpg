@@ -43,6 +43,7 @@ class Household:
 		self.ConsumptionYearly		= profilegentools.gaussMinMax(1400,200) #kWh
 		
 		#According to http://www.energie-nederland.nl/wp-content/uploads/2013/04/EnergieTrends2014.pdf, this is the distribution for devices we are interested in:					
+															#(mu,dev)
 		self.ConsumptionShare = {	"Electronics"	: profilegentools.gaussMinMax(17,3), \
 									"Lighting"		: profilegentools.gaussMinMax(6,2), \
 									"Standby"		: profilegentools.gaussMinMax(35,6) }
@@ -103,7 +104,7 @@ class Household:
 		
 		
 		self.hasDishwasher = False
-		self.hasInductionCooking = False
+		self.hasInductionCooking = random.randint(1,10)<4
 		self.hasEV = False
 		self.hasHP = False
 		self.hasCHP = False
@@ -117,9 +118,11 @@ class Household:
 		self.DishwashDays = []
 		self.DishwashMoment = [-1] * 7
 		
-		#devices
+		#devices (add fan)
 		self.Fridges = []
 		self.Devices = { 	"Kettle": devices.DeviceKettle(config.ConsumptionKettle),\
+							"Blender":  devices.DeviceBlender(config.ConsumptionKettle),\
+							"Fan" : devices.DeviceFan(config.ConsumptionFan),\
 							"Lighting": devices.DeviceLighting(),\
 							"Electronics": devices.DeviceElectronics(),\
 							"Cooking":	devices.DeviceCooking(),\
@@ -330,7 +333,7 @@ class Household:
 			#Kitchen
 			if startCooking != -1:
 				OtherProfile = self.Devices["Cooking"].simulate(1440, self.OccupancyAdultsDay, self.Persons, startCooking, cookingDuration, self.hasInductionCooking, self.HeatingDevices["VentFlow"])
-			OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices['Kettle'].simulate(1440, self.OccupancyPersonsDay))]
+			OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices['Kettle'].simulate(1440, self.OccupancyPersonsDay), self.Devices['Blender'].simulate(1440, self.OccupancyPersonsDay))]
 
 			FridgeProfile = [0] * 1440
 			for f in range(0, len(self.Fridges)):
@@ -345,7 +348,10 @@ class Household:
 			#Vacuumcleaning
 			if random.randint(1,7) == 1:
 				OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices["Vacuumcleaner"].simulate(1440, self.OccupancyAdultsDay, len(self.Persons)))]	
-							
+			
+			#Fan (is this correct?)
+			OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices["Fan"].simulate(1440, self.OccupancyPerson, len(self.Persons)))]				
+
 			#Smart devices
 			if day-config.startDay < config.numDays - 1:
 				#Making sure that we dont run out of the simulation time

@@ -58,8 +58,6 @@ class BufferTimeshiftableDevice(TimeShiftableDevice):
 		self.State = 0
 		self.Consumption = consumption
 
-
-
 class DeviceFridge(Device):
 	def generate(self, consumption):
 		self.Runtime = profilegentools.gaussMinMax(15, 5)
@@ -91,11 +89,12 @@ class DeviceFridge(Device):
 				self.State = 0
 			DeviceProfile[t] = self.State * self.Consumption
 		return DeviceProfile
-		
+
+#other profile		
 class DeviceKettle(Device):
 	def simulate(self, timeintervals, occupancy):
 		DeviceProfile = [0] * timeintervals
-		
+		#m is time
 		m = 0
 		while occupancy[m] == 0:
 			m += 1
@@ -123,8 +122,35 @@ class DeviceKettle(Device):
 				DeviceProfile[i] = self.Consumption
 				
 		return DeviceProfile
+
+#other profile		
+class DeviceBlender(Device):
+	def simulate(self, timeintervals, occupancy):
+		DeviceProfile = [0] * timeintervals
+		
+		m = 0
+		while occupancy[m] == 0:
+			m += 1
+		m = m + random.randint(10,25)
+		if(random.randint(1,10)<7):
+			for i in range(m, m+occupancy[m]):
+				DeviceProfile[i] = self.Consumption
+			
+		#12:00
+		m = random.randint(12*60, 14*60)
+		if occupancy[m] > 0 and (random.randint(1,10)<7):
+			for i in range(m, m+occupancy[m]):
+				DeviceProfile[i] = self.Consumption
+				
+		#afternoon
+		m = random.randint(14*60, 17*60)
+		if occupancy[m] > 0 and (random.randint(1,10)<7):
+			for i in range(m, m+occupancy[m]):
+				DeviceProfile[i] = self.Consumption		
+
+		return DeviceProfile
 	
-#without solar radiant
+	#without solar radiant
 class DeviceLighting(Device):
 	def simulate(self, timeintervals, occupancy, timestamp):
 		sun = config.location.sun(date=datetime.date.fromtimestamp(timestamp), local=True)
@@ -166,6 +192,7 @@ class DeviceElectronics(Device):
 		return ElectronicsProfile
 
 
+
 class DeviceCooking(Device):
 	def simulate(self, timeintervals, occupancy, persons, startCooking, cookingDuration, hasInductionCooking, ventilation):
 		CookingProfile = [0] * 1440
@@ -184,7 +211,7 @@ class DeviceCooking(Device):
 				elif m%(randomCycle*2) < randomCycle:
 					CookingProfile[m] += config.ConsumptionOven
 					
-			cookingDuration = random.randint(35,45)
+			cookingDuration = random.randint(30,50)
 			for m in range(startCooking, startCooking+cookingDuration):
 				ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
 				ventilation.VentilationProfile[m] = min(ventilation.VentilationProfile[m], ventilation.MaxAirflow)
@@ -233,10 +260,10 @@ class DeviceCooking(Device):
 				randomOffset = random.randint(5,15)
 				for m in range(startCooking+randomOffset, startCooking+cookingDuration):
 					CookingProfile[m] += config.ConsumptionMicroWave
-					
+	
+			
 			if(hasInductionCooking):
-				inductionRatio = random.randint(3,6)
-				
+				inductionRatio = random.randint(3,6)			
 				for m in range(startCooking, startCooking+cookingDuration):
 					if m < 6+startCooking:
 						CookingProfile[m] += config.ConsumptionInductionStove
@@ -253,6 +280,22 @@ class DeviceCooking(Device):
 		
 		return CookingProfile
 
+#dd fan, should run 5-7 hours when person at home, normally people always run a fan at room, even at night (to prevent mosquito). Only if it is raining.
+class DeviceFan(Device):
+    def simulate(self, timeintervals, occupancy, numPersons):
+    	#sun = config.location.sun(date=datetime.date.fromtimestamp(timestamp), local=True)
+			# FanOnProfile = [1] * 1440
+        FanProfile = [0] * 1440
+        consuming = 0
+			# for m in range((sun['sunrise'].hour*60+sun['sunrise'].minute)+random.randint(-10,40), \
+			# 	(sun['sunset'].hour*60+sun['sunset'].minute)-random.randint(-10,40)):					# Lighting quite well does match sunrise and sunset. Cloud data can enhance this. based on own experiences :)
+			# 	LightingOnProfile[m] = 0
+        for m in range(0, 1440):
+            if (occupancy[m] == 0  ):
+                FanProfile[m] = 0
+            else:
+                FanProfile[m] = FanProfile[m] + consuming
+        return FanProfile
 
 
 class DeviceVentilation(Device):
