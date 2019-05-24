@@ -57,14 +57,16 @@ class Household:
 									"Fridges"		: [], \
 									"Electronics"	: [], \
 									"Lighting"		: [], \
-									"Standby"		: [] }
+									"Standby"		: [], \
+									"Fan"			: [],}
 		
 		self.consumptionFactor = {	"Other"			: [], \
 									"Inductive"		: [], \
 									"Fridges"		: [], \
 									"Electronics"	: [], \
 									"Lighting"		: [], \
-									"Standby"		: [] }
+									"Standby"		: [], \
+									"Fan"			: [],}
 
 		self.HeatGain = {			"PersonGain"	: [], \
 									"DeviceGain"	: [], \
@@ -88,14 +90,16 @@ class Household:
 									"Fridges"		: [], \
 									"Electronics"	: [], \
 									"Lighting"		: [], \
-									"Standby"		: [] }
+									"Standby"		: [], \
+									"Fan"			: [],}
 		
 		self.ReactiveFactor = {	"Other"			: 1, \
 								"Inductive"		: (random.randint(70,90)/100), \
 								"Fridges"		: (random.randint(50,65)/100), \
 								"Electronics"	: -(random.randint(99,100)/100), \
 								"Lighting"		: -(random.randint(99,100)/100), \
-								"Standby"		: -(random.randint(75,85)/100) }
+								"Standby"		: -(random.randint(75,85)/100),  \
+								"Fan"			: -(random.randint(99,100)/100)}
 		
 		self.PVProfile = []
 		
@@ -149,6 +153,7 @@ class Household:
 		self.Consumption['Other'] = self.consumptionFactor['Other']
 		self.Consumption['Inductive'] = self.consumptionFactor['Inductive']
 		self.Consumption['Fridges'] = self.consumptionFactor['Fridges']
+		self.Consumption['Fan'] = self.consumptionFactor['Fan']
 		
 		self.Consumption['Total'] = self.consumptionFactor['Other']
 		self.Consumption['Total'] = [sum(x) for x in zip(self.Consumption['Total'], self.Consumption['Inductive'])]
@@ -270,7 +275,7 @@ class Household:
 			eventDuration = 0;
 			eventStart = 0;
 			if (day%7==0 or day%7==6) and random.random() < self.familyActivites:
-				#Only on Sundays we will have outings
+				#Only on Sundays we will have outings !! 
 				#see whether it takes whole day or just a visit to other family members
 				#Notice that for now there is no relation between the individual family members and this outing!
 				eventDuration = 0;
@@ -294,7 +299,7 @@ class Household:
 						self.OccupancyPerson[p][t] = 0
 
 
-			#Select cooking time
+			#Select cooking time (dinner)
 			cookingTime = random.randint(17*60,19.5*60)
 			startCooking = cookingTime;
 			cookingDuration = 0
@@ -349,8 +354,8 @@ class Household:
 			if random.randint(1,7) == 1:
 				OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices["Vacuumcleaner"].simulate(1440, self.OccupancyAdultsDay, len(self.Persons)))]	
 			
-			#Fan (is this correct?)
-			OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices["Fan"].simulate(1440, self.OccupancyPerson, len(self.Persons)))]				
+			#Fan
+			FanProfile = self.Devices["Fan"].simulate(1440, day, self.OccupancyPerson , self.Persons) #self.Persons
 
 			#Smart devices
 			if day-config.startDay < config.numDays - 1:
@@ -381,6 +386,7 @@ class Household:
 			self.consumptionFactor['Other'].extend(OtherProfile)
 			self.consumptionFactor['Inductive'].extend(InductiveProfile)
 			self.consumptionFactor['Fridges'].extend(FridgeProfile)
+			self.consumptionFactor['Fan'].extend(FanProfile)
 
 			# Extend the heating vectors
 			self.HeatGain['PersonGain'].extend(HeatPersonGain)

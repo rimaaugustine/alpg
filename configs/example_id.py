@@ -114,7 +114,7 @@ powerBatterySmall = 	3700 	#W
 ConsumptionOven = 				2000	#W
 ConsumptionMicroWave = 			800		#W
 ConsumptionStoveVentilation = 	0 	#W #But this is maximum, usually set lower!
-ConsumptionInductionStove = 	0 	#W #http://homeguides.sfgate.com/many-watts-induction-stove-85380.html
+ConsumptionInductionStove = 	360 	#W #http://homeguides.sfgate.com/many-watts-induction-stove-85380.html
 
 ConsumptionFridgeBigMin = 		80		#W
 ConsumptionFridgeBigMax = 		120		#W
@@ -122,6 +122,8 @@ ConsumptionFridgeSmallMin = 	50		#W
 ConsumptionFridgeSmallMax = 	80		#W
 
 ConsumptionKettle = 			312	#W
+ConsumptionBlender = 			243	#W
+ConsumptionFan = 			    20	#W
 
 #White goods
 ConsumptionIron = 				2000	#W

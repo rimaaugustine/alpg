@@ -1,50 +1,54 @@
 
-	#Artifical load profile generator v1.2, generation of artificial load profiles to benchmark demand side management approaches
-    #Copyright (C) 2018 Gerwin Hoogsteen
+# Artifical load profile generator v1.2, generation of artificial load profiles to benchmark demand side management approaches
+import datetime
+import math
+import linecache
+import profilegentools
+    # Copyright (C) 2018 Gerwin Hoogsteen
 
-    #This program is free software: you can redistribute it and/or modify
-    #it under the terms of the GNU General Public License as published by
-    #the Free Software Foundation, either version 3 of the License, or
-    #(at your option) any later version.
+    # This program is free software: you can redistribute it and/or modify
+    # it under the terms of the GNU General Public License as published by
+    # the Free Software Foundation, either version 3 of the License, or
+    # (at your option) any later version.
 
-    #This program is distributed in the hope that it will be useful,
-    #but WITHOUT ANY WARRANTY; without even the implied warranty of
-    #MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    #GNU General Public License for more details.
+    # This program is distributed in the hope that it will be useful,
+    # but WITHOUT ANY WARRANTY; without even the implied warranty of
+    # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    # GNU General Public License for more details.
 
-    #You should have received a copy of the GNU General Public License
-    #along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    # You should have received a copy of the GNU General Public License
+    # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from configLoader import *
 config = importlib.import_module(cfgFile)
-import math, datetime
-import profilegentools
-import linecache
+
 
 class Device:
-	def __init__(self, consumption = 0):
+	def __init__(self, consumption=0):
 		self.generate(consumption)
-		
-	def generate(self, consumption = 0):
+
+	def generate(self, consumption=0):
 		self.State = 0
 		self.Consumption = consumption
-		
+
 	def writeDevice(self, hnum):
 		pass
 
+
 class TimeShiftableDevice(Device):
-	def __init__(self, consumption = 0):
+	def __init__(self, consumption=0):
 		self.generate(consumption)
 		self.StartTimes = []
 		self.EndTimes = []
-		
-	def generate(self, consumption = 0):
+
+	def generate(self, consumption=0):
 		self.State = 0
-		self.Consumption = consumption		
+		self.Consumption = consumption
+
 
 class BufferTimeshiftableDevice(TimeShiftableDevice):
-	def __init__(self, consumption = 0):
+	def __init__(self, consumption=0):
 		self.generate(consumption)
 		self.BufferCapacity = 0
 		self.Consumption = consumption
@@ -53,10 +57,11 @@ class BufferTimeshiftableDevice(TimeShiftableDevice):
 		self.StartTimes = []
 		self.EndTimes = []
 		TimeShiftableDevice
-		
-	def generate(self, consumption = 0):
+
+	def generate(self, consumption=0):
 		self.State = 0
 		self.Consumption = consumption
+
 
 class DeviceFridge(Device):
 	def generate(self, consumption):
@@ -64,20 +69,20 @@ class DeviceFridge(Device):
 		self.Offtime = profilegentools.gaussMinMax(40, 10)
 		self.Consumption = consumption
 		self.State = 0
-		
+
 		self.RuntimeCycle = self.Runtime
 		self.OfftimeCycle = self.Offtime
-		self.CycleProgress = random.randint(0,self.Runtime+self.Offtime)
+		self.CycleProgress = random.randint(0, self.Runtime+self.Offtime)
 		if(self.CycleProgress < (self.Runtime+self.Offtime)):
 			self.State = 1
-	
+
 	def __init__(self, consumption):
 		self.generate(consumption)
-		
+
 	def simulate(self, timeintervals):
 		DeviceProfile = [0] * timeintervals
 		for t in range(0, timeintervals):
-			#simulate this thing
+			# simulate this thing
 			self.CycleProgress = self.CycleProgress + 1
 			if self.CycleProgress == (self.Runtime+self.Offtime):
 				self.State = 1
@@ -85,216 +90,240 @@ class DeviceFridge(Device):
 				self.OfftimeCycle = random.randint(self.Runtime-2, self.Runtime+2)
 				self.CycleProgress = 0
 			elif(self.CycleProgress == self.Runtime):
-				#Turn it Off
+				# Turn it Off
 				self.State = 0
 			DeviceProfile[t] = self.State * self.Consumption
 		return DeviceProfile
 
-#other profile		
+# other profile
+
+
 class DeviceKettle(Device):
 	def simulate(self, timeintervals, occupancy):
 		DeviceProfile = [0] * timeintervals
-		#m is time
+		# m is time
 		m = 0
 		while occupancy[m] == 0:
 			m += 1
-		m = m + random.randint(10,20)
-		if(random.randint(1,10)<7):
+		m = m + random.randint(10, 20)
+		if(random.randint(1, 10) < 7):
 			for i in range(m, m+occupancy[m]):
 				DeviceProfile[i] = self.Consumption
-			
-		#12:00
+
+		# 12:00
 		m = random.randint(12*60, 14*60)
-		if occupancy[m] > 0 and (random.randint(1,10)<7):
+		if occupancy[m] > 0 and (random.randint(1, 10) < 7):
 			for i in range(m, m+occupancy[m]):
 				DeviceProfile[i] = self.Consumption
-				
-		#afternoon
+
+		# afternoon
 		m = random.randint(14*60, 17*60)
-		if occupancy[m] > 0 and (random.randint(1,10)<7):
-			for i in range(m, m+occupancy[m]):
-				DeviceProfile[i] = self.Consumption		
-		
-		#evening
-		m = random.randint(20*60, 21*60)
-		if occupancy[m] > 0 and (random.randint(1,10)<7):
+		if occupancy[m] > 0 and (random.randint(1, 10) < 7):
 			for i in range(m, m+occupancy[m]):
 				DeviceProfile[i] = self.Consumption
-				
+
+		# evening
+		m = random.randint(20*60, 21*60)
+		if occupancy[m] > 0 and (random.randint(1, 10) < 7):
+			for i in range(m, m+occupancy[m]):
+				DeviceProfile[i] = self.Consumption
+
 		return DeviceProfile
 
-#other profile		
+# other profile
+
+
 class DeviceBlender(Device):
 	def simulate(self, timeintervals, occupancy):
 		DeviceProfile = [0] * timeintervals
-		
+
 		m = 0
 		while occupancy[m] == 0:
 			m += 1
-		m = m + random.randint(10,25)
-		if(random.randint(1,10)<7):
+		m = m + random.randint(10, 25)
+		if(random.randint(1, 10) < 7):
 			for i in range(m, m+occupancy[m]):
 				DeviceProfile[i] = self.Consumption
-			
-		#12:00
+
+		# 12:00
 		m = random.randint(12*60, 14*60)
-		if occupancy[m] > 0 and (random.randint(1,10)<7):
+		if occupancy[m] > 0 and (random.randint(1, 10) < 7):
 			for i in range(m, m+occupancy[m]):
 				DeviceProfile[i] = self.Consumption
-				
-		#afternoon
+
+		# afternoon
 		m = random.randint(14*60, 17*60)
-		if occupancy[m] > 0 and (random.randint(1,10)<7):
+		if occupancy[m] > 0 and (random.randint(1, 10) < 7):
 			for i in range(m, m+occupancy[m]):
-				DeviceProfile[i] = self.Consumption		
+				DeviceProfile[i] = self.Consumption
 
 		return DeviceProfile
-	
-	#without solar radiant
+
+	# without solar radiant
+
+
 class DeviceLighting(Device):
 	def simulate(self, timeintervals, occupancy, timestamp):
-		sun = config.location.sun(date=datetime.date.fromtimestamp(timestamp), local=True)
+		sun = config.location.sun(
+		    date=datetime.date.fromtimestamp(timestamp), local=True)
 		LightingOnProfile = [1] * 1440
 		LightingProfile = [0] * 1440
-		for m in range((sun['sunrise'].hour*60+sun['sunrise'].minute)+random.randint(-10,40), \
-			(sun['sunset'].hour*60+sun['sunset'].minute)-random.randint(-10,40)):					# Lighting quite well does match sunrise and sunset. Cloud data can enhance this. based on own experiences :)
+		for m in range((sun['sunrise'].hour*60+sun['sunrise'].minute)+random.randint(-10, 40),
+			(sun['sunset'].hour*60+sun['sunset'].minute)-random.randint(-10, 40)):					# Lighting quite well does match sunrise and sunset. Cloud data can enhance this. based on own experiences :)
 			LightingOnProfile[m] = 0
-				
+
 		for m in range(0, 1440):
 			if (occupancy[m] == 0 or LightingOnProfile[m] == 0):
 				LightingProfile[m] = 0
 			else:
 				LightingProfile[m] = LightingOnProfile[m] + ((occupancy[m] - 1)*0.2)
-		return LightingProfile		
-	
-	#tv and computer
+		return LightingProfile
+
+	# tv and computer
+
+
 class DeviceElectronics(Device):
 	def simulate(self, timeintervals, occupancy, occupancyPerson):
 		ElectronicsProfile = [0] * 1440
 		for p in range(0, len(occupancyPerson)):
 			consuming = 0
-			for m in range(1,1440):
+			for m in range(1, 1440):
 				if(occupancyPerson[p][m] == 1 and occupancyPerson[p][m-1] == 0):
-					#Person is activated, do something with it
-					#treat the morning differently:
+					# Person is activated, do something with it
+					# treat the morning differently:
 					if m < 13*60:
 						if(random.random() < 0.8-(0.2*(occupancy[m]-1))):
-							consuming = (random.randint(7,10) / 10)
+							consuming = (random.randint(7, 10) / 10)
 							ElectronicsProfile[m] = ElectronicsProfile[m] + consuming
-					else:	
+					else:
 						if(random.random() < 0.8-(0.125*(occupancy[m]-1))):
-							consuming = (random.randint(8,12) / 10)
+							consuming = (random.randint(8, 12) / 10)
 							ElectronicsProfile[m] = ElectronicsProfile[m] + consuming
 				elif(occupancyPerson[p][m] == 0 and occupancyPerson[p][m-1] == 1 and consuming > 0):
 					consuming = 0
-				ElectronicsProfile[m] = ElectronicsProfile[m] + consuming		
-				
-		return ElectronicsProfile
+				ElectronicsProfile[m] = ElectronicsProfile[m] + consuming
 
+		return ElectronicsProfile
 
 
 class DeviceCooking(Device):
 	def simulate(self, timeintervals, occupancy, persons, startCooking, cookingDuration, hasInductionCooking, ventilation):
 		CookingProfile = [0] * 1440
-		cookingDuration = random.randint(20,40)
-		
-		
-		#Now see what well cook: Microwave, Oven or Stove (or Stove and Oven). Lets considder that the fryer will use approx the same amount of energy
-		#Depends on the size of the family, a math.single person household will faster opt for the microwave ;-)
-		CookingType = random.randint(0,10)
-		if CookingType == 10:			
-			cookingDuration = random.randint(25,40)
-			randomCycle = random.randint(4,8)
+		cookingDuration = random.randint(20, 40)
+
+		# Now see what well cook: Microwave, Oven or Stove (or Stove and Oven). Lets considder that the fryer will use approx the same amount of energy
+		# Depends on the size of the family, a math.single person household will faster opt for the microwave ;-)
+		CookingType = random.randint(0, 10)
+		if CookingType == 10:
+			cookingDuration = random.randint(25, 40)
+			randomCycle = random.randint(4, 8)
 			for m in range(startCooking, startCooking+cookingDuration):
 				if m < 10+startCooking:
 					CookingProfile[m] += config.ConsumptionOven
-				elif m%(randomCycle*2) < randomCycle:
+				elif m % (randomCycle*2) < randomCycle:
 					CookingProfile[m] += config.ConsumptionOven
-					
-			cookingDuration = random.randint(30,50)
+
+			cookingDuration = random.randint(30, 50)
 			for m in range(startCooking, startCooking+cookingDuration):
 				ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
-				ventilation.VentilationProfile[m] = min(ventilation.VentilationProfile[m], ventilation.MaxAirflow)
+				ventilation.VentilationProfile[m] = min(
+				    ventilation.VentilationProfile[m], ventilation.MaxAirflow)
 				# CookingProfile[m] += config.ConsumptionStoveVentilation
-				
+
 			if(hasInductionCooking):
-				inductionRatio = random.randint(3,6)
+				inductionRatio = random.randint(3, 6)
 				for m in range(startCooking, startCooking+cookingDuration):
 					if m < 6+startCooking:
 						CookingProfile[m] += config.ConsumptionInductionStove
 					else:
-						CookingProfile[m] += round(config.ConsumptionInductionStove*(inductionRatio/10))
-		
+						CookingProfile[m] += round(config.ConsumptionInductionStove *
+						                           (inductionRatio/10))
+
 		elif CookingType == 9:
-			#Oven 
-			randomCycle = random.randint(4,8)
-			cookingDuration = random.randint(25,40)
+			# Oven
+			randomCycle = random.randint(4, 8)
+			cookingDuration = random.randint(25, 40)
 			for m in range(startCooking, startCooking+cookingDuration):
 				if m < 10+startCooking:
 					CookingProfile[m] += config.ConsumptionOven
-				elif m%(randomCycle*2) < randomCycle:
+				elif m % (randomCycle*2) < randomCycle:
 					CookingProfile[m] += config.ConsumptionOven
-			
-			if random.random()<0.2:
-				cookingDuration = random.randint(4,6)
-				randomOffset = random.randint(5,15)
+
+			if random.random() < 0.2:
+				cookingDuration = random.randint(4, 6)
+				randomOffset = random.randint(5, 15)
 				for m in range(startCooking+randomOffset, startCooking+cookingDuration):
 					CookingProfile[m] += config.ConsumptionMicroWave
-		
+
 		elif((CookingType == 8) or (len(persons) == 2 and CookingType > 6) or (len(persons) == 1 and CookingType > 5)):
-			#Microwave
-			cookingDuration = random.randint(4,6)
+			# Microwave
+			cookingDuration = random.randint(4, 6)
 			for m in range(startCooking, startCooking+cookingDuration):
 				CookingProfile[m] += config.ConsumptionMicroWave
-		
+
 		else:
-		#Stove
-			cookingDuration = random.randint(35,45)
+		# Stove
+			cookingDuration = random.randint(35, 45)
 			for m in range(startCooking, startCooking+cookingDuration):
 				ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
-				ventilation.VentilationProfile[m] = min(ventilation.VentilationProfile[m], ventilation.MaxAirflow)
+				ventilation.VentilationProfile[m] = min(
+				    ventilation.VentilationProfile[m], ventilation.MaxAirflow)
 				# CookingProfile[m] += config.ConsumptionStoveVentilation
-			
-			if random.random()<0.3:
-				cookingDuration = random.randint(4,6)
-				randomOffset = random.randint(5,15)
+
+			if random.random() < 0.3:
+				cookingDuration = random.randint(4, 6)
+				randomOffset = random.randint(5, 15)
 				for m in range(startCooking+randomOffset, startCooking+cookingDuration):
 					CookingProfile[m] += config.ConsumptionMicroWave
-	
-			
+
 			if(hasInductionCooking):
-				inductionRatio = random.randint(3,6)			
+				inductionRatio = random.randint(3, 6)
 				for m in range(startCooking, startCooking+cookingDuration):
 					if m < 6+startCooking:
 						CookingProfile[m] += config.ConsumptionInductionStove
 					else:
-						CookingProfile[m] += round(config.ConsumptionInductionStove*(inductionRatio/10))
-				
+						CookingProfile[m] += round(config.ConsumptionInductionStove *
+						                           (inductionRatio/10))
+
 			if random.random() < 0.2:
-				inductionRatio = random.randint(3,6)
-				for m in range(startCooking+random.randint(6,12), startCooking+cookingDuration):
+				inductionRatio = random.randint(3, 6)
+				for m in range(startCooking+random.randint(6, 12), startCooking+cookingDuration):
 					if m < 18+startCooking:
 						CookingProfile[m] += config.ConsumptionInductionStove
 					else:
-						CookingProfile[m] += round(config.ConsumptionInductionStove*(inductionRatio/10))	
-		
+						CookingProfile[m] += round(config.ConsumptionInductionStove *
+						                           (inductionRatio/10))
+
 		return CookingProfile
 
-#dd fan, should run 5-7 hours when person at home, normally people always run a fan at room, even at night (to prevent mosquito). Only if it is raining.
+# dd fan, should run 5-7 hours when person at home, normally people always run a fan at room, even at night (to prevent mosquito). Only if it is raining.
+
 class DeviceFan(Device):
-    def simulate(self, timeintervals, occupancy, numPersons):
-    	#sun = config.location.sun(date=datetime.date.fromtimestamp(timestamp), local=True)
-			# FanOnProfile = [1] * 1440
-        FanProfile = [0] * 1440
-        consuming = 0
-			# for m in range((sun['sunrise'].hour*60+sun['sunrise'].minute)+random.randint(-10,40), \
-			# 	(sun['sunset'].hour*60+sun['sunset'].minute)-random.randint(-10,40)):					# Lighting quite well does match sunrise and sunset. Cloud data can enhance this. based on own experiences :)
-			# 	LightingOnProfile[m] = 0
-        for m in range(0, 1440):
-            if (occupancy[m] == 0  ):
-                FanProfile[m] = 0
-            else:
-                FanProfile[m] = FanProfile[m] + consuming
+    def simulate(self, timeintervals, day, occupancyPerson, persons): 
+        FanProfile = [0] * timeintervals
+        dayOfWeek = day % 7
+        for m in range(0, timeintervals):
+            at_home = False
+            for idx, p in enumerate(persons): #loop over something and have an automatic counter.
+                if occupancyPerson[idx][m]:
+                    at_home = True
+                    if at_home:
+                        if dayOfWeek in p.Workdays:
+                            if m > p.WorkdayArrival_Avg:
+                                FanProfile[m] = FanProfile[m] + self.Consumption * len(persons)
+                            if m > p.WeekendBedTime_Avg	and  m > random.randint(2*60, 3*60):
+                                FanProfile[m] = FanProfile[m] + self.Consumption
+                            else: 
+                                FanProfile[m] = FanProfile[m]
+                        else:
+                            if m > random.randint(11*60, 16*60):   #5
+                                FanProfile[m] = FanProfile[m] + self.Consumption
+                            elif m > random.randint(18*60, 23*60):  #5
+                                FanProfile[m] = FanProfile[m] + self.Consumption * len(persons)
+                            if m > p.WeekendBedTime_Avg	and  m > random.randint(2*60, 3*60):
+                                FanProfile[m] = FanProfile[m] + self.Consumption 
+                            else:
+                                FanProfile[m] = FanProfile[m]
         return FanProfile
 
 
@@ -461,12 +490,12 @@ class DeviceWashingMachine(TimeShiftableDevice):
 			washingMoment = random.randint(20*60,(22*60-1))
 		if((washingtimeintervals < (22*60)) or (occupancy[washingtimeintervals] < 1)):
 			for i in range(washingtimeintervals, 1440):
-				#Nobody is home, use the next possible moment
+				# Nobody is home, use the next possible moment
 				if occupancy[i] > 0:
 					washingtimeintervals = i
 					break
 			
-		#Starttimeintervals:
+		# Starttimeintervals:
 		if(len(self.EndTimes) > 0):
 			if((washingtimeintervals + 1440*(day)) > self.EndTimes[len(self.EndTimes)-1]):
 				self.StartTimes.append(washingtimeintervals + (1440*(day)))
@@ -487,7 +516,7 @@ class DeviceWashingMachine(TimeShiftableDevice):
 		else:
 			self.EndTimes.append(1440*(day+1) + random.randint(6.5*60,7.5*60))
 
-		#check for overlap on endTimes:
+		# check for overlap on endTimes:
 		if self.EndTimes[len(self.EndTimes)-1] < self.StartTimes[len(self.StartTimes)-1] + 90:
 			self.EndTimes.pop()
 			self.StartTimes.pop()	
@@ -507,12 +536,12 @@ class DeviceDishwasher(TimeShiftableDevice):
 			dishwashtimeintervals = random.randint(20*60,23*60)
 		if((dishwashtimeintervals < (22*60)) or (occupancy[dishwashtimeintervals] < 1)):
 			for i in range(dishwashtimeintervals, 1440):
-				#Nobody is home, use the next possible moment
+				# Nobody is home, use the next possible moment
 				if occupancy[i] > 0:
 					dishwashtimeintervals = i
 					break
 						
-		#Starttimeintervals:
+		# Starttimeintervals:
 		if(len(self.EndTimes) > 0):
 			if((dishwashtimeintervals + (1440*(day))) > self.EndTimes[len(self.EndTimes)-1]):
 				self.StartTimes.append(dishwashtimeintervals + (1440*(day)))
@@ -531,7 +560,7 @@ class DeviceDishwasher(TimeShiftableDevice):
 		else:
 			self.EndTimes.append(1440*(day+1) + random.randint(6*60,7*60))
 			
-		#check for overlap on endTimes:
+		# check for overlap on endTimes:
 		if self.EndTimes[len(self.EndTimes)-1] < self.StartTimes[len(self.StartTimes)-1] + 2*60:
 			self.EndTimes.pop()
 			self.StartTimes.pop()
@@ -551,7 +580,7 @@ class DeviceElectricalVehicle(BufferTimeshiftableDevice):
 			energyLoss = round(person.DistanceToWork / (5+(random.randint(0,100)/100))) * 1000 * 2 #Round trip
 		
 			if(random.randint(1,10) < 3):
-				#add a random trip:
+				# add a random trip:
 				self.StartTimes.append(1440*day + person.WorkdayArrival_Avg + random.randint(150,210))
 				energyLoss = energyLoss + round(random.randint(5,20) / (5+(random.randint(0,100)/100))) * 1000 * 2
 			else:
@@ -559,7 +588,7 @@ class DeviceElectricalVehicle(BufferTimeshiftableDevice):
 
 			energyLoss = round(energyLoss + (energyLoss * 0.166 * ((math.cos((day/365) * 2 * math.pi ))))) #approx 25% less range in winter! Not considering heating here
 						
-			#print(person.DistanceToWork)
+			# print(person.DistanceToWork)
 			if(energyLoss > self.BufferCapacity):
 				energyLoss = self.BufferCapacity
 			self.EnergyLoss.append(energyLoss) #Approx 5.5km/kWh for current (PH)EVs, positive ;-)
@@ -568,9 +597,9 @@ class DeviceElectricalVehicle(BufferTimeshiftableDevice):
 						
 					
 		elif eventDuration > 0 and eventStart > 8*60 and random.randint(1,10)<8:
-			#Family event, lets use it!
+			# Family event, lets use it!
 				
-			#first make sure the car is filled:
+			# first make sure the car is filled:
 			if(len(self.EndTimes) > 0):
 				self.EndTimes.pop() #remove the dummy entry
 				self.EndTimes.append(1440*(day) + eventStart - random.randint(30,60))
@@ -581,7 +610,7 @@ class DeviceElectricalVehicle(BufferTimeshiftableDevice):
 			
 			self.StartTimes.append(1440*day + eventStart+eventDuration + random.randint(0,60))
 			
-			#print(person.DistanceToWork)
+			# print(person.DistanceToWork)
 			if(energyLoss > self.BufferCapacity):
 				energyLoss = self.BufferCapacity
 			self.EnergyLoss.append(energyLoss) #Approx 5.5km/kWh for current (PH)EVs
