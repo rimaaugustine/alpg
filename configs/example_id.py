@@ -124,7 +124,7 @@ ConsumptionFridgeSmallMax = 	80		#W
 ConsumptionKettle = 			312	#W
 ConsumptionBlender = 			243	#W
 ConsumptionFan = 			    20	#W
-
+ConsumptionWaterPump = 			280	#W
 #White goods
 ConsumptionIron = 				2000	#W
 ConsumptionVacuumcleaner = 		0	#W
