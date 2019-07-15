@@ -60,7 +60,7 @@ class Person:
 		self.DistanceToWork  = 0
 			
 		
-		self.CookingTime = self.WorkdayArrival_Avg + 30
+		# self.CookingTime = self.WorkdayArrival_Avg + 30
 
 		self.showerMorning = True
 		self.showerDays = list(range(0, 7))

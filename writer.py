@@ -68,6 +68,8 @@ def createEmptyFiles():
 	createFile('Electricity_Profile_GroupStandby.csv')
 	createFile('Electricity_Profile_GroupFan.csv')
 	createFile('Electricity_Profile_GroupWaterPump.csv')
+	createFile('Electricity_Profile_GroupRiceCooker.csv')
+	createFile('Electricity_Profile_GroupCooking.csv')
 
 	createFile('Reactive_Electricity_Profile.csv')
 	createFile('Reactive_Electricity_Profile_GroupOther.csv')
@@ -78,6 +80,9 @@ def createEmptyFiles():
 	createFile('Reactive_Electricity_Profile_GroupStandby.csv')
 	createFile('Reactive_Electricity_Profile_GroupFan.csv')
 	createFile('Reactive_Electricity_Profile_GroupWaterPump.csv')
+	createFile('Electricity_Profile_GroupRiceCooker.csv')
+	createFile('Reactive_Electricity_Profile_GroupCooking.csv')
+	
 
 	createFile('Electricity_Profile_PVProduction.csv')
 	createFile('PhotovoltaicSettings.txt')
@@ -127,6 +132,8 @@ def writeHousehold(house, num):
 	writeCsvRow('Electricity_Profile_GroupStandby.csv', num, house.Consumption['Standby'])
 	writeCsvRow('Electricity_Profile_GroupFan.csv', num, house.Consumption['Fan'])
 	writeCsvRow('Electricity_Profile_GroupWaterPump.csv', num, house.Consumption['WaterPump'])
+	writeCsvRow('Electricity_Profile_GroupRiceCooker.csv', num, house.Consumption['RiceCooker'])
+	writeCsvRow('Electricity_Profile_GroupCooking.csv', num, house.Consumption['Cooking'])
 
 	writeCsvRow('Reactive_Electricity_Profile.csv', num, house.ReactiveConsumption['Total'])
 	writeCsvRow('Reactive_Electricity_Profile_GroupOther.csv', num, house.ReactiveConsumption['Other'])
@@ -137,6 +144,8 @@ def writeHousehold(house, num):
 	writeCsvRow('Reactive_Electricity_Profile_GroupStandby.csv', num, house.ReactiveConsumption['Standby'])
 	writeCsvRow('Reactive_Electricity_Profile_GroupFan.csv', num, house.ReactiveConsumption['Fan'])
 	writeCsvRow('Reactive_Electricity_Profile_GroupWaterPump.csv', num, house.ReactiveConsumption['WaterPump'])
+	writeCsvRow('Reactive_Electricity_Profile_GroupRiceCooker.csv', num, house.ReactiveConsumption['RiceCooker'])
+	writeCsvRow('Reactive_Electricity_Profile_GroupCooking.csv', num, house.ReactiveConsumption['Cooking'])
 
 	# Save HeatGain profiles
 	writeCsvRow('Heatgain_Profile.csv', num, house.HeatGain['Total'])

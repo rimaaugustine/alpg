@@ -59,7 +59,9 @@ class Household:
 									"Lighting"		: [], \
 									"Standby"		: [], \
 									"Fan"			: [], \
-									"WaterPump"		: [],
+									"WaterPump"		: [], \
+									"RiceCooker"	: [], \
+									"Cooking"		: []
 									}
 		
 		self.consumptionFactor = {	"Other"			: [], \
@@ -69,7 +71,9 @@ class Household:
 									"Lighting"		: [], \
 									"Standby"		: [], \
 									"Fan"			: [], \
-									"WaterPump"		: [],
+									"WaterPump"		: [], \
+									"RiceCooker"	: [], \
+									"Cooking"		: []
 									}
 
 		self.HeatGain = {			"PersonGain"	: [], \
@@ -96,7 +100,9 @@ class Household:
 									"Lighting"		: [], \
 									"Standby"		: [], \
 									"Fan"			: [], \
-									"WaterPump"		: [],
+									"WaterPump"		: [], \
+									"RiceCooker"	: [], \
+									"Cooking"		: []
 									}
 		
 		self.ReactiveFactor = {	"Other"			: 1, \
@@ -106,7 +112,9 @@ class Household:
 								"Lighting"		: -(random.randint(99,100)/100), \
 								"Standby"		: -(random.randint(75,85)/100),  \
 								"Fan"			: 1, \
-								"WaterPump"		: 1
+								"WaterPump"		: 1, \
+								"RiceCooker"	: 1, \
+								"Cooking"		: 1
 
 								}
 		
@@ -137,6 +145,7 @@ class Household:
 							"Blender":  devices.DeviceBlender(config.ConsumptionBlender),\
 							"Fan" : devices.DeviceFan(config.ConsumptionFan),\
 							"WaterPump" : devices.DeviceWaterPump(config.ConsumptionWaterPump),\
+							"RiceCooker" : devices.DeviceRiceCooker(config.ConsumptionRiceCooker),\
 							"Lighting": devices.DeviceLighting(),\
 							"Electronics": devices.DeviceElectronics(),\
 							"Cooking":	devices.DeviceCooking(),\
@@ -162,9 +171,11 @@ class Household:
 		totalShare = 0
 		self.Consumption['Other'] = self.consumptionFactor['Other']
 		self.Consumption['Inductive'] = self.consumptionFactor['Inductive']
+		self.Consumption['Cooking'] = self.consumptionFactor['Cooking']
 		self.Consumption['Fridges'] = self.consumptionFactor['Fridges']
 		self.Consumption['Fan'] = self.consumptionFactor['Fan']
 		self.Consumption['WaterPump'] = self.consumptionFactor['WaterPump']
+		self.Consumption['RiceCooker'] = self.consumptionFactor['RiceCooker']
 		self.Consumption['Total'] = self.consumptionFactor['Other']
 		self.Consumption['Total'] = [sum(x) for x in zip(self.Consumption['Total'], self.Consumption['Inductive'])]
 		self.Consumption['Total'] = [sum(x) for x in zip(self.Consumption['Total'], self.Consumption['Fridges'])]
@@ -310,18 +321,28 @@ class Household:
 
 
 			#Select cooking time (dinner)
+			dayOfWeek = day % 7
 			cookingTime = random.randint(17*60,19.5*60)
 			startCooking = cookingTime;
 			cookingDuration = 0
 			count = 0;
-			while self.OccupancyPersonsDay[startCooking] == 0 and count != 100:
-				startCooking = random.randint(17*60,19.5*60)
-				count += 1
-				if count == 99:
-					startCooking = -1
-					cookingConsumption = 0
-					cookingDuration = 0
-					break
+			for p in self.Persons:		
+				if dayOfWeek in p.Workdays:
+					while self.OccupancyPersonsDay[startCooking] == 0 and count != 100:
+						startCooking = random.randint(17*60,19.5*60)
+						count += 1
+						if count == 99:
+							startCooking = -1
+							cookingDuration = 0
+							break
+				else: 
+					while self.OccupancyPersonsDay[startCooking] == 0 and count != 100:
+						startCooking = random.randint(7*60,12*60)
+						count += 1
+						if count == 99:
+							startCooking = -1
+							cookingDuration = 0
+							break
 
 		
 			#Empty consumption patterns
@@ -329,6 +350,7 @@ class Household:
 			LightingProfile = [0] * 1440
 			OtherProfile = [0] * 1440
 			InductiveProfile = [0] * 1440
+			CookingProfile = [0] * 1440
 			StandbyProfile = [1] * 1440 # Standby is fixed load, but will be scaled!
 
 			# Simualate Heating devices and gains
@@ -348,7 +370,7 @@ class Household:
 
 			#Kitchen
 			if startCooking != -1:
-				OtherProfile = self.Devices["Cooking"].simulate(1440, self.OccupancyAdultsDay, self.Persons, startCooking, cookingDuration, self.hasInductionCooking, self.HeatingDevices["VentFlow"])
+				CookingProfile = self.Devices["Cooking"].simulate(1440, self.OccupancyAdultsDay, self.Persons, startCooking, cookingDuration, self.hasInductionCooking, self.HeatingDevices["VentFlow"])
 			OtherProfile = [sum(x) for x in zip(OtherProfile, self.Devices['Kettle'].simulate(1440, self.OccupancyPersonsDay), self.Devices['Blender'].simulate(1440, self.OccupancyPersonsDay))]
 
 			FridgeProfile = [0] * 1440
@@ -368,8 +390,9 @@ class Household:
 			#Fan
 			FanProfile = self.Devices["Fan"].simulate(1440, day, self.OccupancyPerson , self.Persons) #self.Persons
 
-			#WaterPump 1440, self.OccupancyAdultsDay, self.Persons, startCooking, cookingDuration, self.hasInductionCooking, self.HeatingDevices["VentFlow"]
+			#WaterPump 1440, 
 			WaterPumpProfile = self.Devices["WaterPump"].simulate(1440, day, self.OccupancyPerson, self.Persons) #self.Persons
+			RiceCookerProfile = self.Devices["RiceCooker"].simulate(1440, day, self.OccupancyPerson, self.Persons) #self.Persons
 	
 
 			#Smart devices
@@ -400,9 +423,11 @@ class Household:
 			self.consumptionFactor['Standby'].extend(StandbyProfile)
 			self.consumptionFactor['Other'].extend(OtherProfile)
 			self.consumptionFactor['Inductive'].extend(InductiveProfile)
+			self.consumptionFactor['Cooking'].extend(CookingProfile)
 			self.consumptionFactor['Fridges'].extend(FridgeProfile)
 			self.consumptionFactor['Fan'].extend(FanProfile)
 			self.consumptionFactor['WaterPump'].extend(WaterPumpProfile)
+			self.consumptionFactor['RiceCooker'].extend(RiceCookerProfile)
 
 			# Extend the heating vectors
 			self.HeatGain['PersonGain'].extend(HeatPersonGain)

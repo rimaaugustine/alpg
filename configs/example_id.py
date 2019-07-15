@@ -115,6 +115,9 @@ ConsumptionOven = 				2000	#W
 ConsumptionMicroWave = 			800		#W
 ConsumptionStoveVentilation = 	0 	#W #But this is maximum, usually set lower!
 ConsumptionInductionStove = 	360 	#W #http://homeguides.sfgate.com/many-watts-induction-stove-85380.html
+# ConsumptionRiceCookerCooking   = 280 #W
+# ConsumptionRiceCookerWarm   = 50 #W
+
 
 ConsumptionFridgeBigMin = 		80		#W
 ConsumptionFridgeBigMax = 		120		#W
@@ -125,6 +128,7 @@ ConsumptionKettle = 			312	#W
 ConsumptionBlender = 			243	#W
 ConsumptionFan = 			    20	#W
 ConsumptionWaterPump = 			280	#W
+ConsumptionRiceCooker = 		280	#W
 #White goods
 ConsumptionIron = 				2000	#W
 ConsumptionVacuumcleaner = 		0	#W

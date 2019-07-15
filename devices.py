@@ -62,7 +62,7 @@ class BufferTimeshiftableDevice(TimeShiftableDevice):
         self.State = 0
         self.Consumption = consumption
 
-
+#fridge 
 class DeviceFridge(Device):
     def generate(self, consumption):
         self.Runtime = profilegentools.gaussMinMax(15, 5)
@@ -98,8 +98,6 @@ class DeviceFridge(Device):
         return DeviceProfile
 
 # other profile
-
-
 class DeviceKettle(Device):
     def simulate(self, timeintervals, occupancy):
         DeviceProfile = [0] * timeintervals
@@ -133,12 +131,9 @@ class DeviceKettle(Device):
         return DeviceProfile
 
 # other profile
-
-
 class DeviceBlender(Device):
     def simulate(self, timeintervals, occupancy):
         DeviceProfile = [0] * timeintervals
-
         m = 0
         while occupancy[m] == 0:
             m += 1
@@ -158,12 +153,9 @@ class DeviceBlender(Device):
         if occupancy[m] > 0 and (random.randint(1, 10) < 7):
             for i in range(m, m+occupancy[m]):
                 DeviceProfile[i] = self.Consumption
-
         return DeviceProfile
 
     # without solar radiant
-
-
 class DeviceLighting(Device):
     def simulate(self, timeintervals, occupancy, timestamp):
         sun = config.location.sun(
@@ -208,100 +200,137 @@ class DeviceElectronics(Device):
 
         return ElectronicsProfile
 
+class DeviceRiceCooker(Device):
+    def simulate(self, timeintervals, day, occupancy, persons):
+        RiceCookerProfile = [0] * timeintervals
+        cookingDuration = random.randint(30, 40) 
+        warmingDuration = random.randint(6*60, 7*60)
+        dayOfWeek = day % 7
+        cook = False
+        warm = False
+        for m in range(0, timeintervals):
+            at_home = False
+            for  idx, p in enumerate(persons):
+                if occupancy[idx][m]:
+                    at_home = True
+                    if at_home:
+                        if dayOfWeek in p.Workdays: 
+                            if m > p.WorkdayWakeUp_Avg + 120:
+                                for i in range(m, min(m+cookingDuration, timeintervals)):
+                                    RiceCookerProfile[i] = RiceCookerProfile[i] + self.Consumption
+                                    cook = True
+                                if cook:
+                                    break;
+                            else:
+                                RiceCookerProfile[m] = RiceCookerProfile[m]
+                        else: 
+                            if m > random.randint(9, 12) * 60:
+                                for i in range(m, min(m+cookingDuration, timeintervals)):
+                                    RiceCookerProfile[i] = RiceCookerProfile[i] + self.Consumption
+                                    cook = True
+                                if cook:
+                                    break;
+                            else:
+                                RiceCookerProfile[m] = RiceCookerProfile[m]
+            if cook:
+                break;                   
 
-class DeviceCooking(Device):
+        return RiceCookerProfile
+
+#35 mins cooking mode, 6-7hours warming mode 
+class DeviceCooking(Device): 
     def simulate(self, timeintervals, occupancy, persons, startCooking, cookingDuration, hasInductionCooking, ventilation):
-        CookingProfile = [0] * 1440
-        cookingDuration = random.randint(20, 40)
-
+        CookingProfile = [0] * timeintervals 
+        # cookingDuration = random.randint(30, 40) 
+        # warmingDuration = random.randint(6*60, 7*60)
         # Now see what well cook: Microwave, Oven or Stove (or Stove and Oven). Lets considder that the fryer will use approx the same amount of energy
         # Depends on the size of the family, a math.single person household will faster opt for the microwave ;-)
-        CookingType = random.randint(0, 10)
-        if CookingType == 10: 
-            cookingDuration = random.randint(25, 40)
-            randomCycle = random.randint(4, 8)
-            for m in range(startCooking, startCooking+cookingDuration):
-                if m < 10+startCooking:
-                    CookingProfile[m] += config.ConsumptionOven
-                elif m % (randomCycle*2) < randomCycle:
-                    CookingProfile[m] += config.ConsumptionOven
+        #rice cooker only
+  
+        # CookingType = random.randint(0, 2)
+        # if CookingType == 0: 
+        #     cookingDuration = random.randint(35, 45)
+        #     randomCycle = random.randint(4, 8)
+        #     for m in range(startCooking, startCooking+cookingDuration):
+        #         if m < 10+startCooking:
+        #             CookingProfile[m] += config.ConsumptionOven
+        #         elif m % (randomCycle*2) < randomCycle:
+        #             CookingProfile[m] += config.ConsumptionOven
 
-            cookingDuration = random.randint(30, 50)
-            for m in range(startCooking, startCooking+cookingDuration):
-                ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
-                ventilation.VentilationProfile[m] = min(
-                    ventilation.VentilationProfile[m], ventilation.MaxAirflow)
-                # CookingProfile[m] += config.ConsumptionStoveVentilation
+        #     cookingDuration = random.randint(30, 50)
+        #     for m in range(startCooking, startCooking+cookingDuration):
+        #         ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
+        #         ventilation.VentilationProfile[m] = min(
+        #             ventilation.VentilationProfile[m], ventilation.MaxAirflow)
+        #         # CookingProfile[m] += config.ConsumptionStoveVentilation
 
-            if(hasInductionCooking):
-                inductionRatio = random.randint(3, 6)
-                for m in range(startCooking, startCooking+cookingDuration):
-                    if m < 6+startCooking:
-                        CookingProfile[m] += config.ConsumptionInductionStove
-                    else:
-                        CookingProfile[m] += round(config.ConsumptionInductionStove *
-                                                   (inductionRatio/10))
+        #     if(hasInductionCooking):
+        #         inductionRatio = random.randint(3, 6)
+        #         for m in range(startCooking, startCooking+cookingDuration):
+        #             if m < 6+startCooking:
+        #                 CookingProfile[m] += config.ConsumptionInductionStove
+        #             else:
+        #                 CookingProfile[m] += round(config.ConsumptionInductionStove *
+        #                                            (inductionRatio/10))
 
-        elif CookingType == 9:
-            # Oven
-            randomCycle = random.randint(4, 8)
-            cookingDuration = random.randint(25, 40)
-            for m in range(startCooking, startCooking+cookingDuration):
-                if m < 10+startCooking:
-                    CookingProfile[m] += config.ConsumptionOven
-                elif m % (randomCycle*2) < randomCycle:
-                    CookingProfile[m] += config.ConsumptionOven
+        # elif CookingType == 9:
+        #     # Oven
+        #     randomCycle = random.randint(4, 8)
+        #     cookingDuration = random.randint(25, 40)
+        #     for m in range(startCooking, startCooking+cookingDuration):
+        #         if m < 10+startCooking:
+        #             CookingProfile[m] += config.ConsumptionOven
+        #         elif m % (randomCycle*2) < randomCycle:
+        #             CookingProfile[m] += config.ConsumptionOven
 
-            if random.random() < 0.2:
-                cookingDuration = random.randint(4, 6)
-                randomOffset = random.randint(5, 15)
-                for m in range(startCooking+randomOffset, startCooking+cookingDuration):
-                    CookingProfile[m] += config.ConsumptionMicroWave
+        #     if random.random() < 0.2:
+        #         cookingDuration = random.randint(4, 6)
+        #         randomOffset = random.randint(5, 15)
+        #         for m in range(startCooking+randomOffset, startCooking+cookingDuration):
+        #             CookingProfile[m] += config.ConsumptionMicroWave
 
-        elif((CookingType == 8) or (len(persons) == 2 and CookingType > 6) or (len(persons) == 1 and CookingType > 5)):
-            # Microwave
-            cookingDuration = random.randint(4, 6)
-            for m in range(startCooking, startCooking+cookingDuration):
-                CookingProfile[m] += config.ConsumptionMicroWave
+        # elif((CookingType == 8) or (len(persons) == 2 and CookingType > 6) or (len(persons) == 1 and CookingType > 5)):
+        #     # Microwave
+        #     cookingDuration = random.randint(4, 6)
+        #     for m in range(startCooking, startCooking+cookingDuration):
+        #         CookingProfile[m] += config.ConsumptionMicroWave
 
-        else:
-            # Stove
-            cookingDuration = random.randint(35, 45)
-            for m in range(startCooking, startCooking+cookingDuration):
-                ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
-                ventilation.VentilationProfile[m] = min(
-                    ventilation.VentilationProfile[m], ventilation.MaxAirflow)
-                # CookingProfile[m] += config.ConsumptionStoveVentilation
+        # else:
+        #     # Stove
+        #     cookingDuration = random.randint(35, 45)
+        #     for m in range(startCooking, startCooking+cookingDuration):
+        #         ventilation.VentilationProfile[m] += ventilation.CookingAirFlow
+        #         ventilation.VentilationProfile[m] = min(
+        #             ventilation.VentilationProfile[m], ventilation.MaxAirflow)
+        #         # CookingProfile[m] += config.ConsumptionStoveVentilation
 
-            if random.random() < 0.3:
-                cookingDuration = random.randint(4, 6)
-                randomOffset = random.randint(5, 15)
-                for m in range(startCooking+randomOffset, startCooking+cookingDuration):
-                    CookingProfile[m] += config.ConsumptionMicroWave
+        #     if random.random() < 0.3:
+        #         cookingDuration = random.randint(4, 6)
+        #         randomOffset = random.randint(5, 15)
+        #         for m in range(startCooking+randomOffset, startCooking+cookingDuration):
+        #             CookingProfile[m] += config.ConsumptionMicroWave
 
-            if(hasInductionCooking):
-                inductionRatio = random.randint(3, 6)
-                for m in range(startCooking, startCooking+cookingDuration):
-                    if m < 6+startCooking:
-                        CookingProfile[m] += config.ConsumptionInductionStove
-                    else:
-                        CookingProfile[m] += round(config.ConsumptionInductionStove *
-                                                   (inductionRatio/10))
+        #     if(hasInductionCooking):
+        #         inductionRatio = random.randint(3, 6)
+        #         for m in range(startCooking, startCooking+cookingDuration):
+        #             if m < 6+startCooking:
+        #                 CookingProfile[m] += config.ConsumptionInductionStove
+        #             else:
+        #                 CookingProfile[m] += round(config.ConsumptionInductionStove *
+        #                                            (inductionRatio/10))
 
-            if random.random() < 0.2:
-                inductionRatio = random.randint(3, 6)
-                for m in range(startCooking+random.randint(6, 12), startCooking+cookingDuration):
-                    if m < 18+startCooking:
-                        CookingProfile[m] += config.ConsumptionInductionStove
-                    else:
-                        CookingProfile[m] += round(config.ConsumptionInductionStove *
-                                                   (inductionRatio/10))
+        #     if random.random() < 0.2:
+        #         inductionRatio = random.randint(3, 6)
+        #         for m in range(startCooking+random.randint(6, 12), startCooking+cookingDuration):
+        #             if m < 18+startCooking:
+        #                 CookingProfile[m] += config.ConsumptionInductionStove
+        #             else:
+        #                 CookingProfile[m] += round(config.ConsumptionInductionStove *
+        #                                            (inductionRatio/10))
 
         return CookingProfile
 
 # dd fan, should run 5-7 hours when person at home, normally people always run a fan at room, even at night (to prevent mosquito). Only if it is raining.
-
-
 class DeviceFan(Device):
     def simulate(self, timeintervals, day, occupancyPerson, persons):
         FanProfile = [0] * timeintervals
@@ -337,8 +366,6 @@ class DeviceFan(Device):
         return FanProfile
 
 # water-pump
-
-
 class DeviceWaterPump(Device):
     def simulate(self, timeintervals, day, occupancy, persons):
         WaterPumpProfile = [0] * 1440
